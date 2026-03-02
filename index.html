@@ -1,0 +1,497 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vintage Store Earnings Report</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="container">
+      <h1 id="pageTitleHeading">Vintage Store Earnings Report</h1>
+      <p class="subtext">Track sales, vendor payouts, trends, expenses, and settings.</p>
+
+      <div class="tabs" role="tablist" aria-label="App sections">
+        <button id="tabSales" class="tab-btn active" role="tab" aria-selected="true">Sales</button>
+        <button id="tabVendors" class="tab-btn" role="tab" aria-selected="false">Vendors</button>
+        <button id="tabTrends" class="tab-btn" role="tab" aria-selected="false">Trends</button>
+        <button id="tabExpenses" class="tab-btn" role="tab" aria-selected="false">Expenses</button>
+        <button id="tabSettings" class="tab-btn" role="tab" aria-selected="false">Settings</button>
+      </div>
+
+      <section id="salesTab" class="tab-panel">
+        <section class="card">
+          <h2>Date Range Report</h2>
+          <div class="import-row">
+            <label>
+              Start Date
+              <input type="date" id="reportStartDate" />
+            </label>
+            <label>
+              End Date
+              <input type="date" id="reportEndDate" />
+            </label>
+            <button id="runReportBtn" type="button">Run Report</button>
+            <button id="showAllBtn" class="secondary" type="button">Show All Dates</button>
+            <button id="downloadPdfBtn" type="button">Download PDF</button>
+            <button id="downloadExcelBtn" type="button">Download Excel</button>
+          </div>
+          <p id="reportRangeLabel" class="subtext compact">Showing all dates.</p>
+        </section>
+
+        <section class="card">
+          <h2>Import Existing Sheet</h2>
+          <p class="subtext compact">Import replaces current sales and vendors in this app.</p>
+          <div class="import-row">
+            <input type="file" id="csvFile" accept=".csv,text/csv" />
+            <button id="importCsvBtn" type="button">Import CSV</button>
+          </div>
+        </section>
+
+        <section class="card">
+          <h2>Add Sale</h2>
+          <form id="sale-form">
+            <div class="grid">
+              <label>
+                Date
+                <input type="date" id="date" name="date" required />
+              </label>
+
+              <label>
+                Time
+                <input type="time" id="time" name="time" required />
+              </label>
+
+              <label>
+                Category
+                <input type="text" id="category" name="category" placeholder="Dress, Top, Shoes..." />
+              </label>
+
+              <label>
+                Employee
+                <input type="text" id="employee" name="employee" placeholder="Ren, Steisy, etc." />
+              </label>
+
+              <label>
+                Vendor
+                <select id="vendorSelect" name="vendorSelect">
+                  <option value="">Select vendor</option>
+                </select>
+              </label>
+
+              <label>
+                Vendor Name (Manual)
+                <input type="text" id="vendorName" name="vendorName" placeholder="Vendor name" />
+              </label>
+
+              <label>
+                Store Commission (%)
+                <input type="number" id="commissionRate" name="commissionRate" min="0" max="100" step="0.01" value="30" />
+              </label>
+
+              <label>
+                Payment Method
+                <input type="text" id="paymentMethod" name="paymentMethod" placeholder="Cash, Venmo, Zelle, Square" />
+              </label>
+
+              <label>
+                Item
+                <input type="text" id="itemName" name="itemName" placeholder="Vintage jacket, lamp, etc." required />
+              </label>
+
+              <label>
+                Sale Amount ($)
+                <input type="number" id="saleAmount" name="saleAmount" min="0" step="0.01" required />
+              </label>
+            </div>
+            <button type="submit">Add Sale</button>
+          </form>
+        </section>
+
+        <section class="card">
+          <h2>Report</h2>
+          <div id="salesReportGrid" class="report-grid"></div>
+        </section>
+
+        <section class="card">
+          <div class="table-head">
+            <h2>Sales Log</h2>
+            <button id="clearAll" class="secondary" type="button">Clear All</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Month</th>
+                  <th>Year</th>
+                  <th>Day</th>
+                  <th>Date</th>
+                  <th>Time</th>
+                  <th>Category</th>
+                  <th>Employee</th>
+                  <th>Item</th>
+                  <th>Vendor</th>
+                  <th>Sale</th>
+                  <th>Payment</th>
+                  <th>Commission %</th>
+                  <th>Store Earned</th>
+                  <th>Vendor Payout</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="salesBody"></tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+
+      <section id="vendorsTab" class="tab-panel hidden">
+        <section class="card">
+          <h2>Vendor Directory</h2>
+          <form id="vendor-form" class="grid">
+            <label>
+              Vendor Name
+              <input type="text" id="vendorDirectoryName" name="vendorDirectoryName" placeholder="Vendor name" required />
+            </label>
+            <label>
+              Commission (%)
+              <input type="number" id="vendorDirectoryCommission" name="vendorDirectoryCommission" min="0" max="100" step="0.01" value="30" required />
+            </label>
+          </form>
+          <button id="addVendorBtn" type="button">Add Vendor</button>
+        </section>
+
+        <section class="card">
+          <h2>Saved Vendors</h2>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Name</th><th>Commission</th><th>Action</th></tr>
+              </thead>
+              <tbody id="vendorsBody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="card">
+          <h2>Record Vendor Payment</h2>
+          <form id="vendor-payment-form" class="grid">
+            <label>
+              Vendor
+              <select id="paymentVendorId" name="paymentVendorId" required><option value="">Select vendor</option></select>
+            </label>
+            <label>
+              Payment Date
+              <input type="date" id="paymentDate" name="paymentDate" required />
+            </label>
+            <label>
+              Payment Amount ($)
+              <input type="number" id="paymentAmount" name="paymentAmount" min="0" step="0.01" required />
+            </label>
+            <label>
+              Payment Method
+              <input type="text" id="paymentMethodVendor" name="paymentMethodVendor" placeholder="Cash, Venmo, Zelle" />
+            </label>
+          </form>
+          <button id="addVendorPaymentBtn" type="button">Add Payment</button>
+        </section>
+
+        <section class="card">
+          <h2>Vendor Balances</h2>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Vendor</th><th>Earned To Date</th><th>Paid To Date</th><th>Owed To Date</th></tr>
+              </thead>
+              <tbody id="vendorBalancesBody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="card">
+          <h2>Vendor Payment Log</h2>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Date</th><th>Vendor</th><th>Amount</th><th>Method</th><th>Action</th></tr>
+              </thead>
+              <tbody id="vendorPaymentsBody"></tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+
+      <section id="trendsTab" class="tab-panel hidden">
+        <section class="card">
+          <h2>Trend Filters</h2>
+          <div class="grid">
+            <label>Start Date<input type="date" id="trendStartDate" /></label>
+            <label>End Date<input type="date" id="trendEndDate" /></label>
+            <label>
+              Group By
+              <select id="trendGranularity">
+                <option value="daily">Daily</option>
+                <option value="weekly">Weekly</option>
+                <option value="monthly">Monthly</option>
+              </select>
+            </label>
+            <label>
+              Metric
+              <select id="trendMetric">
+                <option value="total">Total Revenue</option>
+                <option value="store">Store Revenue</option>
+                <option value="vendor">Vendor Payouts</option>
+                <option value="count">Sales Count</option>
+              </select>
+            </label>
+            <label><span>Category</span><select id="trendCategory"><option value="">All Categories</option></select></label>
+            <label>
+              Weekday
+              <select id="trendWeekday">
+                <option value="">All Weekdays</option>
+                <option value="0">Sunday</option>
+                <option value="1">Monday</option>
+                <option value="2">Tuesday</option>
+                <option value="3">Wednesday</option>
+                <option value="4">Thursday</option>
+                <option value="5">Friday</option>
+                <option value="6">Saturday</option>
+              </select>
+            </label>
+            <label><span>Vendor</span><select id="trendVendor"><option value="">All Vendors</option></select></label>
+          </div>
+          <div class="import-row">
+            <button id="applyTrendFiltersBtn" type="button">Apply Trend Filters</button>
+            <button id="resetTrendFiltersBtn" class="secondary" type="button">Reset Filters</button>
+            <label class="checkbox-label"><input type="checkbox" id="trendComparePrev" /> Compare to previous period</label>
+          </div>
+        </section>
+
+        <section class="trend-layout">
+          <aside class="card trend-nav">
+            <h2>Trend Reports</h2>
+            <button type="button" class="trend-nav-btn active" data-trend-target="trendPanelTime">Sales Over Time</button>
+            <button type="button" class="trend-nav-btn" data-trend-target="trendPanelItemBreakdown">Item Price-Point Breakdown</button>
+            <button type="button" class="trend-nav-btn" data-trend-target="trendPanelCategory">Category Performance</button>
+            <button type="button" class="trend-nav-btn" data-trend-target="trendPanelWeekday">Weekday Performance</button>
+            <button type="button" class="trend-nav-btn" data-trend-target="trendPanelFrequency">Time Frequency (12 PM - 7 PM)</button>
+            <button type="button" class="trend-nav-btn" data-trend-target="trendPanelEmployee">Employee Revenue (Ashley)</button>
+          </aside>
+
+          <div class="trend-report-content">
+            <section id="trendPanelTime" class="card trend-report-panel">
+              <h2>Sales Over Time</h2>
+              <div class="import-row">
+                <label>
+                  Month
+                  <select id="trendMonthTime">
+                    <option value="">All Months</option>
+                  </select>
+                </label>
+              </div>
+              <div class="chart-wrap"><canvas id="timeTrendChart"></canvas></div>
+            </section>
+
+            <section id="trendPanelItemBreakdown" class="card trend-report-panel hidden">
+              <h2>Item Price-Point Breakdown</h2>
+              <div class="import-row">
+                <label>
+                  Month
+                  <select id="trendMonthItemBreakdown">
+                    <option value="">All Months</option>
+                  </select>
+                </label>
+              </div>
+              <div class="item-breakdown-layout">
+                <div class="item-breakdown-left">
+                  <label>
+                    Item
+                    <select id="trendItemSelect">
+                      <option value="">Select item</option>
+                    </select>
+                  </label>
+                  <p class="subtext compact" id="trendItemSummary">Select an item to view quantity sold by price point.</p>
+                </div>
+                <div class="item-breakdown-right table-wrap">
+                  <div class="chart-wrap">
+                    <canvas id="trendItemPriceChart"></canvas>
+                  </div>
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Price Point</th>
+                        <th>Quantity Sold</th>
+                        <th>Revenue At Price</th>
+                      </tr>
+                    </thead>
+                    <tbody id="trendItemPriceBody"></tbody>
+                  </table>
+                </div>
+              </div>
+            </section>
+
+            <section id="trendPanelCategory" class="card trend-report-panel hidden">
+              <h2>Category Performance</h2>
+              <div class="import-row">
+                <label>
+                  Month
+                  <select id="trendMonthCategory">
+                    <option value="">All Months</option>
+                  </select>
+                </label>
+              </div>
+              <div class="chart-wrap"><canvas id="categoryTrendChart"></canvas></div>
+            </section>
+
+            <section id="trendPanelWeekday" class="card trend-report-panel hidden">
+              <h2>Weekday Performance</h2>
+              <div class="import-row">
+                <label>
+                  Month
+                  <select id="trendMonthWeekday">
+                    <option value="">All Months</option>
+                  </select>
+                </label>
+              </div>
+              <div class="chart-wrap"><canvas id="weekdayTrendChart"></canvas></div>
+            </section>
+
+            <section id="trendPanelFrequency" class="card trend-report-panel hidden">
+              <h2>Time Frequency (12 PM - 7 PM)</h2>
+              <div class="import-row">
+                <label>
+                  Month
+                  <select id="trendMonthFrequency">
+                    <option value="">All Months</option>
+                  </select>
+                </label>
+                <label>
+                  Weekday
+                  <select id="timeFrequencyWeekday">
+                    <option value="">All Days</option>
+                    <option value="0">Sunday</option>
+                    <option value="1">Monday</option>
+                    <option value="2">Tuesday</option>
+                    <option value="3">Wednesday</option>
+                    <option value="4">Thursday</option>
+                    <option value="5">Friday</option>
+                    <option value="6">Saturday</option>
+                  </select>
+                </label>
+              </div>
+              <p class="subtext compact" id="timeFrequencyInsights">Frequency bars show count of sales per 15-minute interval.</p>
+              <div id="timeFrequencyBars" class="frequency-bars"></div>
+            </section>
+
+            <section id="trendPanelEmployee" class="card trend-report-panel hidden">
+              <h2>Employee Revenue (Ashley)</h2>
+              <div class="import-row">
+                <label>
+                  Month
+                  <select id="trendMonthEmployee">
+                    <option value="">All Months</option>
+                  </select>
+                </label>
+              </div>
+              <p class="subtext compact" id="employeeRevenueSummary">Compares Ashley labor expense ($75/day worked) vs revenue on days she worked.</p>
+              <div class="chart-wrap"><canvas id="employeeRevenueChart"></canvas></div>
+            </section>
+          </div>
+        </section>
+      </section>
+
+      <section id="expensesTab" class="tab-panel hidden">
+        <section class="card">
+          <h2>Add Expense</h2>
+          <form id="expense-form">
+            <div class="grid">
+              <label>Date<input type="date" id="expenseDate" name="expenseDate" required /></label>
+              <label>Category<input type="text" id="expenseCategory" name="expenseCategory" placeholder="Rent, Supplies, Marketing" required /></label>
+              <label>Vendor/Payee<input type="text" id="expenseVendor" name="expenseVendor" placeholder="Landlord, Utility Co" /></label>
+              <label>Amount ($)<input type="number" id="expenseAmount" name="expenseAmount" min="0" step="0.01" required /></label>
+              <label>Payment Method<input type="text" id="expenseMethod" name="expenseMethod" placeholder="ACH, Card, Cash" /></label>
+              <label>Notes<input type="text" id="expenseNotes" name="expenseNotes" placeholder="Optional" /></label>
+              <label class="checkbox-label"><input type="checkbox" id="expenseRecurring" name="expenseRecurring" /> Recurring Monthly</label>
+            </div>
+            <button type="submit">Add Expense</button>
+          </form>
+        </section>
+
+        <section class="card">
+          <h2>Expense Projection</h2>
+          <div class="import-row">
+            <label>Start Date<input type="date" id="expenseStartDate" /></label>
+            <label>End Date<input type="date" id="expenseEndDate" /></label>
+            <label>Project Months<input type="number" id="expenseProjectionMonths" min="1" max="24" value="6" /></label>
+            <button id="applyExpenseFiltersBtn" type="button">Apply</button>
+            <button id="resetExpenseFiltersBtn" class="secondary" type="button">Reset</button>
+          </div>
+          <p id="expenseRangeLabel" class="subtext compact">Showing all expense dates.</p>
+          <div class="report-grid">
+            <article><h3>Total Expenses</h3><p id="totalExpenses">$0.00</p></article>
+            <article><h3>Recurring Monthly</h3><p id="recurringMonthly">$0.00</p></article>
+            <article><h3>Avg Monthly Expenses</h3><p id="avgMonthlyExpenses">$0.00</p></article>
+            <article><h3>Projected Expenses</h3><p id="projectedExpenses">$0.00</p></article>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="table-head">
+            <h2>Expense Log</h2>
+            <button id="clearExpenses" class="secondary" type="button">Clear Expenses</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th><th>Category</th><th>Vendor/Payee</th><th>Amount</th><th>Method</th><th>Recurring</th><th>Notes</th><th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="expensesBody"></tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+
+      <section id="settingsTab" class="tab-panel hidden">
+        <section class="card">
+          <h2>Settings</h2>
+          <form id="settings-form">
+            <div class="grid">
+              <label>Page Title<input type="text" id="settingsPageTitle" name="settingsPageTitle" /></label>
+              <label>Background Color<input type="color" id="settingsBgColor" name="settingsBgColor" value="#ffdbe8" /></label>
+              <label>Panel Box Color<input type="color" id="settingsPanelColor" name="settingsPanelColor" value="#fff3f8" /></label>
+              <label>Data Box Color<input type="color" id="settingsDataBoxColor" name="settingsDataBoxColor" value="#fff8fb" /></label>
+              <label>Box Border Color<input type="color" id="settingsBorderColor" name="settingsBorderColor" value="#efbdd2" /></label>
+              <label>Font Size<input type="range" id="settingsFontSize" name="settingsFontSize" min="13" max="21" value="14" /></label>
+              <label>Currency
+                <select id="settingsCurrency" name="settingsCurrency">
+                  <option value="USD">USD</option>
+                  <option value="EUR">EUR</option>
+                  <option value="GBP">GBP</option>
+                  <option value="CAD">CAD</option>
+                </select>
+              </label>
+              <label>Default Commission (%)<input type="number" id="settingsDefaultCommission" name="settingsDefaultCommission" min="0" max="100" step="0.01" value="30" /></label>
+              <label class="checkbox-label"><input type="checkbox" id="settingsRequireTime" name="settingsRequireTime" checked /> Require time on sales</label>
+            </div>
+
+            <h3>Report Box Display</h3>
+            <p class="subtext compact">Choose what each Sales report box (1-10) shows.</p>
+            <div id="settingsReportCardsConfig" class="grid"></div>
+
+            <div class="import-row">
+              <button id="saveSettingsBtn" type="submit">Save Settings</button>
+              <button id="resetSettingsBtn" class="secondary" type="button">Reset Defaults</button>
+            </div>
+          </form>
+        </section>
+      </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>
