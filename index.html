@@ -81,11 +81,6 @@
               </label>
 
               <label>
-                Category
-                <input type="text" id="category" name="category" placeholder="Dress, Top, Shoes..." />
-              </label>
-
-              <label>
                 Employee
                 <input type="text" id="employee" name="employee" placeholder="Ren, Steisy, etc." />
               </label>
@@ -99,7 +94,7 @@
 
               <label>
                 Vendor Name (Manual)
-                <input type="text" id="vendorName" name="vendorName" placeholder="Vendor name" />
+                <input type="text" id="vendorName" name="vendorName" list="vendorHistoryList" placeholder="Vendor name" />
               </label>
 
               <label>
@@ -109,12 +104,12 @@
 
               <label>
                 Payment Method
-                <input type="text" id="paymentMethod" name="paymentMethod" placeholder="Cash, Venmo, Zelle, Square" />
+                <input type="text" id="paymentMethod" name="paymentMethod" list="paymentMethodHistoryList" placeholder="Cash, Venmo, Zelle, Square" />
               </label>
 
               <label>
                 Item
-                <input type="text" id="itemName" name="itemName" placeholder="Vintage jacket, lamp, etc." required />
+                <input type="text" id="itemName" name="itemName" list="itemHistoryList" placeholder="Vintage jacket, lamp, etc." required />
               </label>
 
               <label>
@@ -124,6 +119,9 @@
             </div>
             <button type="submit">Add Sale</button>
           </form>
+          <datalist id="itemHistoryList"></datalist>
+          <datalist id="vendorHistoryList"></datalist>
+          <datalist id="paymentMethodHistoryList"></datalist>
         </section>
 
         <section class="card">
@@ -145,7 +143,6 @@
                   <th>Day</th>
                   <th>Date</th>
                   <th>Time</th>
-                  <th>Category</th>
                   <th>Employee</th>
                   <th>Item</th>
                   <th>Vendor</th>

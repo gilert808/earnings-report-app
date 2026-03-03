@@ -94,6 +94,9 @@ const el = {
   vendorSelect: document.getElementById("vendorSelect"),
   vendorNameInput: document.getElementById("vendorName"),
   commissionInput: document.getElementById("commissionRate"),
+  itemHistoryList: document.getElementById("itemHistoryList"),
+  vendorHistoryList: document.getElementById("vendorHistoryList"),
+  paymentMethodHistoryList: document.getElementById("paymentMethodHistoryList"),
 
   paymentVendorSelect: document.getElementById("paymentVendorId"),
   paymentDateInput: document.getElementById("paymentDate"),
@@ -646,6 +649,48 @@ function renderVendorOptions() {
   el.vendorSelect.value = exists ? current : "";
 }
 
+function getFrequencySortedValues(values) {
+  const counts = new Map();
+  const labels = new Map();
+  values.forEach((raw) => {
+    const value = (raw || "").toString().trim();
+    if (!value) return;
+    const key = normalizeName(value);
+    counts.set(key, (counts.get(key) || 0) + 1);
+    if (!labels.has(key)) labels.set(key, value);
+  });
+  return Array.from(counts.entries())
+    .sort((a, b) => {
+      const diff = b[1] - a[1];
+      if (diff !== 0) return diff;
+      return (labels.get(a[0]) || "").localeCompare(labels.get(b[0]) || "");
+    })
+    .map(([key]) => labels.get(key) || "");
+}
+
+function fillDatalist(datalistEl, values) {
+  if (!datalistEl) return;
+  datalistEl.innerHTML = "";
+  values.forEach((value) => {
+    const option = document.createElement("option");
+    option.value = value;
+    datalistEl.appendChild(option);
+  });
+}
+
+function renderSaleHistoryDropdowns() {
+  const itemValues = getFrequencySortedValues(sales.map((entry) => entry.itemName || ""));
+  const paymentValues = getFrequencySortedValues(sales.map((entry) => entry.paymentMethod || ""));
+  const vendorValues = getFrequencySortedValues([
+    ...sales.map((entry) => entry.vendorName || ""),
+    ...vendors.map((vendor) => vendor.name || ""),
+  ]);
+
+  fillDatalist(el.itemHistoryList, itemValues);
+  fillDatalist(el.paymentMethodHistoryList, paymentValues);
+  fillDatalist(el.vendorHistoryList, vendorValues);
+}
+
 function renderVendorPaymentOptions() {
   const current = el.paymentVendorSelect.value;
   el.paymentVendorSelect.innerHTML = '<option value="">Select vendor</option>';
@@ -829,7 +874,6 @@ function renderSales(entries) {
       <td>${dateParts.day}</td>
       <td>${entry.date || ""}</td>
       <td>${formatTimeDisplay(entry.time)}</td>
-      <td>${entry.category || ""}</td>
       <td>${entry.employee || ""}</td>
       <td>${entry.itemName || ""}</td>
       <td>${entry.vendorName || ""}</td>
@@ -1448,6 +1492,7 @@ function updateSalesView() {
     : "Showing all dates.";
   renderSales(entries);
   renderVendorBalances();
+  renderSaleHistoryDropdowns();
   refreshTrendFilterOptions();
   renderTrends();
 }
@@ -1792,22 +1837,6 @@ function setupEvents() {
     el.commissionInput.value = selected.commissionRate;
   });
 
-  el.itemNameInput.addEventListener("blur", () => {
-    const currentCategory = (el.saleForm.category?.value || "").toString().trim();
-    if (!currentCategory) {
-      const item = (el.itemNameInput.value || "").toString().trim();
-      if (item && el.saleForm.category) el.saleForm.category.value = normalizeCategoryLabel(item);
-    }
-  });
-
-  if (el.saleForm.category) {
-    el.saleForm.category.addEventListener("blur", () => {
-      const value = (el.saleForm.category.value || "").toString().trim();
-      if (!value) return;
-      el.saleForm.category.value = normalizeCategoryLabel(value);
-    });
-  }
-
   el.saleForm.addEventListener("submit", (event) => {
     event.preventDefault();
     const form = new FormData(el.saleForm);
@@ -1835,7 +1864,7 @@ function setupEvents() {
         id: crypto.randomUUID(),
         date,
         time,
-        category: normalizeCategoryLabel((form.get("category") || "").toString().trim() || itemName),
+        category: normalizeCategoryLabel(itemName),
         employee: (form.get("employee") || "").toString().trim(),
         itemName,
         vendorName,
@@ -2160,6 +2189,7 @@ async function initialize() {
   el.expenseForm.querySelector("#expenseDate").valueAsDate = new Date();
 
   renderVendors();
+  renderSaleHistoryDropdowns();
   updateSalesView();
   renderExpensesView();
   setupEvents();
